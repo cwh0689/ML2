@@ -1,0 +1,33 @@
+#데이터 불러오기
+train_data <- read.csv("simple_train_data.csv") 
+test_data <- read.csv("simple_test_data.csv")
+
+#회귀분석 모델
+model<-lm(upper_arm ~ thigh, data = train_data)
+summary(model)
+         
+#모델 저장
+saveRDS(model, "regression_model.rds")
+
+#모델 불러오기
+loaded_model <- readRDS ("regression_model.rds")
+
+#불러온 모델을 활용한 예측
+predicted <- predict(loaded_model, newdata = test_data)
+head (predicted)
+install.packages("ggplot2")
+library(ggplot2)
+ggplot(train_data, aes(x = thigh, y = upper_arm)) +
+  geom_point(color="blue", alpha = 0.6) +
+  geom_smooth(method = "lm", color = "red", se = FALSE) + # 회귀선 (표준오차 리본 제거)
+  labs(title="대퇴부vs상박부 회귀분석",
+       x="대퇴부 둘레(cm)",
+       y="상박부 둘레(cm)")
+  
+#예측 결과와 실제값 비교
+results <- data.frame(Actual=test_data$upper_arm, Predicted = predicted)
+
+#RMSE 계산
+rmse <- sqrt(mean((results$Actual - results$Predicted)^2))
+print(paste("RMSE:", round(rmse,3)))
+  
